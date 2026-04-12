@@ -8,17 +8,14 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        .leaflet-container { height: 600px; border-radius: 12px; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-950 p-4">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
         const AVIATIONSTACK_KEY = '8e092a48cae2106ab1d4880d426cffc0';
 
@@ -35,262 +32,497 @@
             'HECA': { name: 'Cairo', lat: 30.1219, lng: 31.4056 }
         };
 
-        const CANCELLATION_REASONS = {
-            '2026-02-28': 'Iran-US-Israel war began. Etihad suspended all operations.',
-            '2026-03-01': 'AUH airport directly struck by Iranian missiles. Airport closed.',
-            '2026-03-02': 'Airport damage assessment ongoing. All flights grounded.',
-            '2026-03-03': 'Continued suspension due to ongoing missile attacks on UAE.',
-            '2026-03-04': 'Security assessment ongoing. Airport partially operational but Etihad grounded.',
-            '2026-03-05': 'Final day of total suspension before limited resumption.',
-            '2026-03-09': 'Sporadic cancellation during early recovery period. Limited aircraft/crew availability.',
-            '2026-03-11': 'Individual cancellation during gradual service restoration.',
-            '2026-03-15': 'Operational constraints during conflict. Limited route capacity.',
-            '2026-03-21': 'Crew/aircraft positioning issues during recovery phase.',
-            '2026-03-23': 'Individual cancellation during conflict recovery period.'
-        };
+        // CANCELLATION_REASONS removed - no reliable data on WHY flights were cancelled/diverted
 
+        // REAL FLIGHT DATA - Extracted from FlightRadar24 on 2026-04-12
+        // Source: Flight history PDFs for EY461 (MEL→AUH) and EY111 (AUH→BCN)
+        // Data shows actual flights that departed (Landed status) from Jan 1 - Apr 12, 2026
         const FLIGHTS = {
+            '2026-01-01': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:44', delay: -6 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:15', delay: 20 }
+            ],
+            '2026-01-02': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:30', delay: -38 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:07', delay: 10 }
+            ],
+            '2026-01-03': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:41', delay: 37 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:57', delay: -11 }
+            ],
+            '2026-01-04': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:22', delay: 21 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:52', delay: -27 }
+            ],
+            '2026-01-05': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:58', delay: -3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: -16 }
+            ],
+            '2026-01-06': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:37', delay: -12 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: 4 }
+            ],
+            '2026-01-07': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:05', delay: 3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:06', delay: -2 }
+            ],
+            '2026-01-08': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:41', delay: -20 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:53', delay: -3 }
+            ],
+            '2026-01-09': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '20:28', delay: 83 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:53', delay: 4 }
+            ],
+            '2026-01-10': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:03', delay: 19 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:04', delay: 2 }
+            ],
+            '2026-01-11': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:10', delay: 8 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:10', delay: 4 }
+            ],
+            '2026-01-12': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:42', delay: -12 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:32', delay: 20 }
+            ],
+            '2026-01-13': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:32', delay: -23 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:00', delay: 3 }
+            ],
+            '2026-01-14': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:05', delay: 18 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:13', delay: 4 }
+            ],
+            '2026-01-15': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:40', delay: -2 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:48', delay: 34 }
+            ],
+            '2026-01-16': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:43', delay: 4 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: 6 }
+            ],
+            '2026-01-17': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:39', delay: 4 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:06', delay: 2 }
+            ],
+            '2026-01-18': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:59', delay: 22 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:53', delay: -13 }
+            ],
+            '2026-01-19': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:25', delay: 59 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:28', delay: 11 }
+            ],
+            '2026-01-20': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:26', delay: 34 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:01', delay: -9 }
+            ],
+            '2026-01-21': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:50', delay: -3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: 7 }
+            ],
+            '2026-01-22': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:10', delay: 22 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:05', delay: -3 }
+            ],
+            '2026-01-23': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:17', delay: 45 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:05', delay: 8 }
+            ],
+            '2026-01-24': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:43', delay: 68 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:07', delay: 10 }
+            ],
+            '2026-01-25': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:44', delay: 3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:03', delay: 5 }
+            ],
+            '2026-01-26': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:22', delay: -14 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:24', delay: 9 }
+            ],
+            '2026-01-27': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:41', delay: -1 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:06', delay: -1 }
+            ],
+            '2026-01-28': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:44', delay: -9 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:08', delay: -7 }
+            ],
+            '2026-01-29': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:57', delay: 8 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:17', delay: 3 }
+            ],
+            '2026-01-30': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:55', delay: 13 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:13', delay: 6 }
+            ],
+            '2026-01-31': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:35', delay: 6 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: -8 }
+            ],
+            '2026-02-01': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:31', delay: -10 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:25', delay: 12 }
+            ],
+            '2026-02-02': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:44', delay: -3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:40', delay: 14 }
+            ],
+            '2026-02-03': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:31', delay: -7 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:19', delay: 3 }
+            ],
+            '2026-02-04': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:30', delay: -19 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: -2 }
+            ],
+            '2026-02-05': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:42', delay: -11 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:34', delay: 19 }
+            ],
+            '2026-02-06': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:09', delay: 20 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:11', delay: 2 }
+            ],
+            '2026-02-07': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:06', delay: 11 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:17', delay: 4 }
+            ],
+            '2026-02-08': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:16', delay: 28 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:03', delay: 2 }
+            ],
+            '2026-02-09': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:41', delay: -11 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:04', delay: 0 }
+            ],
+            '2026-02-10': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:33', delay: -19 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:59', delay: 7 }
+            ],
+            '2026-02-11': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:09', delay: 20 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:28', delay: 16 }
+            ],
+            '2026-02-12': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:51', delay: -4 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:07', delay: 14 }
+            ],
+            '2026-02-13': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:41', delay: -17 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:20', delay: 8 }
+            ],
+            '2026-02-14': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:29', delay: 23 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:14', delay: -4 }
+            ],
+            '2026-02-15': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:33', delay: -21 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:58', delay: -27 }
+            ],
+            '2026-02-16': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:43', delay: -3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:12', delay: -11 }
+            ],
+            '2026-02-17': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:33', delay: -18 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:07', delay: -19 }
+            ],
+            '2026-02-18': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:59', delay: -12 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:57', delay: -25 }
+            ],
+            '2026-02-19': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:59', delay: 0 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:03', delay: -9 }
+            ],
+            '2026-02-20': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:59', delay: -3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: -18 }
+            ],
+            '2026-02-21': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:54', delay: -4 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:13', delay: -20 }
+            ],
+            '2026-02-22': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:33', delay: -18 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:50', delay: -32 }
+            ],
+            '2026-02-23': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:00', delay: -3 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:16', delay: 2 }
+            ],
+            '2026-02-24': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:41', delay: -27 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:14', delay: 2 }
+            ],
+            '2026-02-25': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:52', delay: -14 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:04', delay: -16 }
+            ],
             '2026-02-26': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:10', delay: 0 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:10', delay: 0 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:44', delay: -25 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:54', delay: -34 }
             ],
             '2026-02-27': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:15', delay: 5 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:15', delay: 5 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:28', delay: 24 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:57', delay: -29 }
             ],
             '2026-02-28': [
                 { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:02', delay: -34 }
             ],
             '2026-03-01': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-02': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
-            ],
-            '2026-03-03': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-04': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-05': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
+            ],
+            '2026-03-06': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-07': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:45', delay: 35 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:50', delay: 40 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '21:53', delay: 178 }
+            ],
+            '2026-03-08': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-09': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:20', delay: 70 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-11': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:10', delay: 60 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:30', delay: 37 }
+            ],
+            '2026-03-12': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-13': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:55', delay: 45 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:45', delay: 35 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
+            ],
+            '2026-03-14': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'not_scheduled' },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'not_scheduled' }
             ],
             '2026-03-15': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:52', delay: -6 }
             ],
-            '2026-03-17': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:40', delay: 30 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:30', delay: 20 }
+            '2026-03-16': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '16:43', delay: -33 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:54', delay: 0 }
+            ],
+            '2026-03-18': [
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:09', delay: 18 }
             ],
             '2026-03-19': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:25', delay: 15 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:25', delay: 15 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '16:45', delay: -114 }
+            ],
+            '2026-03-20': [
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:53', delay: 10 }
             ],
             '2026-03-21': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'cancelled' },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:55', delay: 45 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '16:51', delay: -22 }
+            ],
+            '2026-03-22': [
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:54', delay: -53 }
             ],
             '2026-03-23': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:10', delay: 60 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'cancelled' }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '16:58', delay: -8 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:32', delay: -4 }
             ],
             '2026-03-25': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:30', delay: 20 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:40', delay: 30 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:55', delay: -28 }
+            ],
+            '2026-03-26': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:07', delay: 1 }
             ],
             '2026-03-27': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:50', delay: 40 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:35', delay: 25 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '05:34', delay: 129 }
+            ],
+            '2026-03-28': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '16:59', delay: -30 }
             ],
             '2026-03-29': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:20', delay: 10 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:20', delay: 10 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '03:01', delay: -35 }
             ],
-            '2026-03-31': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:35', delay: 25 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:30', delay: 20 }
+            '2026-03-30': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:08', delay: 23 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:59', delay: -35 }
+            ],
+            '2026-04-01': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '18:46', delay: 5 }
             ],
             '2026-04-02': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:15', delay: 5 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:25', delay: 15 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:33', delay: -27 }
+            ],
+            '2026-04-03': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '19:01', delay: 43 }
             ],
             '2026-04-04': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:40', delay: 30 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:18', delay: 8 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:32', delay: -29 }
+            ],
+            '2026-04-05': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:23', delay: 7 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:07', delay: -32 }
             ],
             '2026-04-06': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:25', delay: 15 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:22', delay: 12 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:33', delay: 7 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:35', delay: -5 }
             ],
-            '2026-04-08': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:20', delay: 10 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:15', delay: 5 }
+            '2026-04-07': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:26', delay: 23 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:32', delay: -20 }
             ],
             '2026-04-09': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:15', delay: 5 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:12', delay: 2 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:58', delay: 20 }
             ],
             '2026-04-10': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:12', delay: 2 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:10', delay: 0 }
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:41', delay: 13 }
             ],
             '2026-04-11': [
-                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:10', delay: 0 },
-                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:10', delay: 0 }
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:48', delay: -6 }
+            ],
+            '2026-04-12': [
+                { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:50', delay: 7 },
+                { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '09:29', delay: 384 }
             ]
         };
 
-        function RouteMap() {
-            const { useState, useEffect, useRef } = React;
-            const [routes, setRoutes] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const mapRef = useRef(null);
-            const mapInstance = useRef(null);
-
-            useEffect(() => {
-                // Initialize map
-                if (!mapInstance.current && mapRef.current) {
-                    mapInstance.current = L.map(mapRef.current).setView([24.4330, 54.6511], 3);
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                        attribution: '© OpenStreetMap, © CARTO',
-                        maxZoom: 19
-                    }).addTo(mapInstance.current);
-
-                    // AUH marker
-                    L.marker([24.4330, 54.6511])
-                        .addTo(mapInstance.current)
-                        .bindPopup('<b>Abu Dhabi (AUH)</b><br>Zayed International Airport');
-                }
-
-                // Fetch routes
-                fetchRoutes();
-            }, []);
-
-            const fetchRoutes = async () => {
-                setLoading(true);
-                // Just use sample data for now (API has issues)
-                setSampleData();
-                setLoading(false);
-            };
-
-            const setSampleData = () => {
-                // Sample AUH routes (realistic based on Etihad network)
-                const sampleRoutes = [
-                    { flight: 'EY461', airline: 'Etihad', origin: 'AUH', destination: 'YMML', status: 'active', scheduled: '2026-04-12T17:10:00' },
-                    { flight: 'EY111', airline: 'Etihad', origin: 'AUH', destination: 'LEBL', status: 'active', scheduled: '2026-04-12T02:10:00' },
-                    { flight: 'EY17', airline: 'Etihad', origin: 'AUH', destination: 'EGLL', status: 'active', scheduled: '2026-04-12T08:45:00' },
-                    { flight: 'EY392', airline: 'Etihad', origin: 'AUH', destination: 'OERK', status: 'cancelled', scheduled: '2026-04-12T14:30:00' },
-                    { flight: 'EY511', airline: 'Etihad', origin: 'AUH', destination: 'HECA', status: 'active', scheduled: '2026-04-12T11:20:00' },
-                    { flight: 'EY641', airline: 'Etihad', origin: 'AUH', destination: 'OJAI', status: 'cancelled', scheduled: '2026-04-12T16:15:00' },
-                    { flight: 'EY151', airline: 'Etihad', origin: 'AUH', destination: 'OMDB', status: 'cancelled', scheduled: '2026-04-12T09:30:00' },
-                    { flight: 'EY319', airline: 'Etihad', origin: 'AUH', destination: 'OTHH', status: 'cancelled', scheduled: '2026-04-12T13:00:00' }
-                ];
-                console.log('Setting sample routes:', sampleRoutes);
-                setRoutes(sampleRoutes);
-            };
-
-            useEffect(() => {
-                if (mapInstance.current && routes.length > 0) {
-                    // Draw routes
-                    routes.forEach(route => {
-                        const dest = AIRPORTS[route.destination];
-                        if (!dest) return;
-
-                        const auh = [24.4330, 54.6511];
-                        const destCoords = [dest.lat, dest.lng];
-
-                        const color = route.status === 'cancelled' ? '#ef4444' : '#22c55e';
-                        const weight = route.status === 'cancelled' ? 3 : 2;
-
-                        // Draw curved line
-                        const line = L.polyline([auh, destCoords], {
-                            color: color,
-                            weight: weight,
-                            opacity: 0.7
-                        }).addTo(mapInstance.current);
-
-                        line.bindPopup(`
-                            <b>${route.flight}</b><br>
-                            ${route.airline}<br>
-                            AUH → ${dest.name}<br>
-                            Status: <span style="color: ${color}; font-weight: bold;">${route.status.toUpperCase()}</span><br>
-                            Scheduled: ${new Date(route.scheduled).toLocaleTimeString()}
-                        `);
-
-                        // Destination marker
-                        L.circleMarker(destCoords, {
-                            radius: 6,
-                            fillColor: color,
-                            color: '#fff',
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        }).addTo(mapInstance.current).bindPopup(`<b>${dest.name}</b>`);
-                    });
-                }
-            }, [routes]);
-
-            const operated = routes.filter(r => r.status !== 'cancelled').length;
-            const cancelled = routes.filter(r => r.status === 'cancelled').length;
-
-            return (
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 mt-6">
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                        🗺️ All AUH Routes (Past 48hrs)
-                    </h2>
-
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-3">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Operating</div>
-                            <div className="text-3xl font-bold text-green-600">{operated}</div>
-                        </div>
-                        <div className="bg-red-50 dark:bg-red-950 border-2 border-red-600 rounded-lg p-3">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Cancelled</div>
-                            <div className="text-3xl font-bold text-red-600">{cancelled}</div>
-                        </div>
-                    </div>
-
-                    {loading && (
-                        <div className="text-center py-10 text-gray-600 dark:text-gray-400">
-                            Loading routes...
-                        </div>
-                    )}
-
-                    <div ref={mapRef} className="mb-4"></div>
-
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <strong>Green</strong> = Operating | <strong>Red</strong> = Cancelled | Click routes/markers for details
-                    </div>
-                </div>
-            );
-        }
-
         function App() {
-            const [modal, setModal] = useState(null);
+            const [mergedFlights, setMergedFlights] = useState(FLIGHTS);
+            const [apiDataLoaded, setApiDataLoaded] = useState(false);
+
+            // Fetch API data on mount and merge with static data
+            useEffect(() => {
+                async function fetchFlightChunks(flightNumber, startDate, endDate) {
+                    const allFlights = [];
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    let currentStart = new Date(start);
+
+                    while (currentStart <= end) {
+                        let currentEnd = new Date(currentStart);
+                        currentEnd.setDate(currentEnd.getDate() + 13); // 14 days total
+
+                        if (currentEnd > end) {
+                            currentEnd = new Date(end);
+                        }
+
+                        const startStr = currentStart.toISOString().split('T')[0];
+                        const endStr = currentEnd.toISOString().split('T')[0];
+
+                        try {
+                            const response = await fetch(`http://localhost:3000/api/flights?callsign=${flightNumber}&startDate=${startStr}&endDate=${endStr}`);
+                            const data = await response.json();
+
+                            if (data.data && Array.isArray(data.data)) {
+                                allFlights.push(...data.data);
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching ${flightNumber} chunk ${startStr} to ${endStr}:`, error);
+                        }
+
+                        currentStart.setDate(currentStart.getDate() + 14);
+                        await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+                    }
+
+                    return allFlights;
+                }
+
+                async function fetchAPIData() {
+                    try {
+                        // Fetch both flights from API (data available from Mar 14 onwards)
+                        // Use chunking to handle 14-day API limit
+                        const [ey461Flights, ey111Flights] = await Promise.all([
+                            fetchFlightChunks('EY461', '2026-03-14', '2026-05-02'),
+                            fetchFlightChunks('EY111', '2026-03-14', '2026-05-02')
+                        ]);
+
+                        // Convert API data to FLIGHTS format
+                        const apiFlights = {};
+
+                        // Process EY461 flights
+                        ey461Flights.forEach(flight => {
+                            if (!flight.datetime_takeoff) return; // Skip flights without takeoff time
+
+                            const takeoffDate = new Date(flight.datetime_takeoff);
+                            const dateStr = `${takeoffDate.getFullYear()}-${String(takeoffDate.getMonth() + 1).padStart(2, '0')}-${String(takeoffDate.getDate()).padStart(2, '0')}`;
+
+                            if (!apiFlights[dateStr]) apiFlights[dateStr] = [];
+
+                            const landedDate = flight.datetime_landed ? new Date(flight.datetime_landed) : null;
+                            const scheduledTime = '18:49'; // EY461 scheduled departure
+
+                            // If flight took off, it operated (landing time may be missing due to tracking gaps)
+                            apiFlights[dateStr].push({
+                                flight: 'EY461',
+                                route: 'MEL→AUH',
+                                status: 'flew', // If it took off, it operated
+                                time: landedDate ? landedDate.toISOString().substr(11, 5) : takeoffDate.toISOString().substr(11, 5),
+                                delay: 0
+                            });
+                        });
+
+                        // Process EY111 flights
+                        ey111Flights.forEach(flight => {
+                            // EY111 is AUH→BCN, so we care about takeoff from OMAA
+                            if (flight.orig_icao !== 'OMAA') return; // Only OMAA departures
+
+                            const takeoffDate = flight.datetime_takeoff ? new Date(flight.datetime_takeoff) : null;
+                            if (!takeoffDate) return; // Skip if no takeoff
+
+                            const dateStr = `${takeoffDate.getFullYear()}-${String(takeoffDate.getMonth() + 1).padStart(2, '0')}-${String(takeoffDate.getDate()).padStart(2, '0')}`;
+
+                            if (!apiFlights[dateStr]) apiFlights[dateStr] = [];
+
+                            const landedDate = flight.datetime_landed ? new Date(flight.datetime_landed) : null;
+                            const scheduledTime = '03:15'; // EY111 scheduled departure
+
+                            // If flight took off, it operated (landing time may be missing due to tracking gaps)
+                            apiFlights[dateStr].push({
+                                flight: 'EY111',
+                                route: 'AUH→BCN',
+                                status: 'flew', // If it took off, it operated
+                                time: landedDate ? landedDate.toISOString().substr(11, 5) : takeoffDate.toISOString().substr(11, 5),
+                                delay: 0
+                            });
+                        });
+
+                        // Merge API data with static data (API data takes precedence for dates >= Mar 14)
+                        const merged = { ...FLIGHTS };
+                        Object.keys(apiFlights).forEach(dateStr => {
+                            if (dateStr >= '2026-03-14') {
+                                merged[dateStr] = apiFlights[dateStr];
+                            }
+                        });
+
+                        setMergedFlights(merged);
+                        setApiDataLoaded(true);
+                    } catch (error) {
+                        console.error('Failed to fetch API data:', error);
+                        // Keep static data on error
+                        setApiDataLoaded(true);
+                    }
+                }
+
+                fetchAPIData();
+            }, []);
 
             const start = new Date('2026-02-26');
             const end = new Date('2026-05-02');
@@ -298,11 +530,15 @@
             const days = [];
             let current = new Date(start);
             while (current <= end) {
-                const dateStr = current.toISOString().split('T')[0];
+                // Format date in local timezone, not UTC, to avoid date shifting
+                const year = current.getFullYear();
+                const month = String(current.getMonth() + 1).padStart(2, '0');
+                const day = String(current.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
                 days.push({
                     date: new Date(current),
                     dateStr,
-                    flights: FLIGHTS[dateStr] || []
+                    flights: mergedFlights[dateStr] || []
                 });
                 current.setDate(current.getDate() + 1);
             }
@@ -312,20 +548,19 @@
 
             // Calculate stats
             let ey461Flew = 0, ey461Canc = 0, ey111Flew = 0, ey111Canc = 0;
-            Object.values(FLIGHTS).forEach(dayFlights => {
+            Object.values(mergedFlights).forEach(dayFlights => {
                 dayFlights.forEach(f => {
                     if (f.flight === 'EY461') {
                         if (f.status === 'flew') ey461Flew++;
                         else if (f.status === 'cancelled') ey461Canc++;
+                        // not_scheduled doesn't count in either category
                     } else if (f.flight === 'EY111') {
                         if (f.status === 'flew') ey111Flew++;
                         else if (f.status === 'cancelled') ey111Canc++;
+                        // not_scheduled doesn't count in either category
                     }
                 });
             });
-
-            const ey461Rate = Math.round((ey461Flew / (ey461Flew + ey461Canc)) * 100);
-            const ey111Rate = Math.round((ey111Flew / (ey111Flew + ey111Canc)) * 100);
 
             return (
                 <div className="max-w-7xl mx-auto">
@@ -371,19 +606,6 @@
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-blue-50 dark:bg-blue-950 border-2 border-blue-600 rounded-lg p-4">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">EY461 Reliability</div>
-                                <div className="text-3xl font-bold text-blue-600">{ey461Rate}%</div>
-                                <div className="text-xs text-gray-500">MEL → AUH (May 1)</div>
-                            </div>
-                            <div className="bg-blue-50 dark:bg-blue-950 border-2 border-blue-600 rounded-lg p-4">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">EY111 Reliability</div>
-                                <div className="text-3xl font-bold text-blue-600">{ey111Rate}%</div>
-                                <div className="text-xs text-gray-500">AUH → BCN (May 2)</div>
-                            </div>
-                        </div>
-
                         {/* Calendar */}
                         <div className="grid grid-cols-7 gap-1 text-center mb-2">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
@@ -416,19 +638,18 @@
                                         {ey461 && (
                                             <div
                                                 className={`mb-2 p-1 rounded ${
-                                                    ey461.status === 'flew' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900 cursor-pointer hover:bg-red-200 dark:hover:bg-red-800'
+                                                    ey461.status === 'flew' ? 'bg-green-100 dark:bg-green-900' :
+                                                    ey461.status === 'not_scheduled' ? 'bg-gray-200 dark:bg-gray-700' :
+                                                    'bg-red-100 dark:bg-red-900'
                                                 }`}
-                                                onClick={() => ey461.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && setModal({
-                                                    flight: 'EY461',
-                                                    date: day.dateStr,
-                                                    reason: CANCELLATION_REASONS[day.dateStr]
-                                                })}
                                             >
                                                 <div className="text-xs font-bold text-gray-900 dark:text-white">EY461</div>
                                                 <div className={`text-xs font-bold ${
-                                                    ey461.status === 'flew' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                                                    ey461.status === 'flew' ? 'text-green-700 dark:text-green-300' :
+                                                    ey461.status === 'not_scheduled' ? 'text-gray-600 dark:text-gray-400' :
+                                                    'text-red-700 dark:text-red-300'
                                                 }`}>
-                                                    {ey461.status === 'flew' ? 'FLEW' : 'CANC'}
+                                                    {ey461.status === 'flew' ? 'FLEW' : ey461.status === 'not_scheduled' ? 'NOT SCHED' : 'CANC'}
                                                 </div>
                                                 {ey461.time && (
                                                     <>
@@ -438,28 +659,24 @@
                                                         )}
                                                     </>
                                                 )}
-                                                {ey461.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && (
-                                                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">Click for details</div>
-                                                )}
                                             </div>
                                         )}
 
                                         {ey111 && (
                                             <div
                                                 className={`p-1 rounded ${
-                                                    ey111.status === 'flew' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900 cursor-pointer hover:bg-red-200 dark:hover:bg-red-800'
+                                                    ey111.status === 'flew' ? 'bg-green-100 dark:bg-green-900' :
+                                                    ey111.status === 'not_scheduled' ? 'bg-gray-200 dark:bg-gray-700' :
+                                                    'bg-red-100 dark:bg-red-900'
                                                 }`}
-                                                onClick={() => ey111.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && setModal({
-                                                    flight: 'EY111',
-                                                    date: day.dateStr,
-                                                    reason: CANCELLATION_REASONS[day.dateStr]
-                                                })}
                                             >
                                                 <div className="text-xs font-bold text-gray-900 dark:text-white">EY111</div>
                                                 <div className={`text-xs font-bold ${
-                                                    ey111.status === 'flew' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                                                    ey111.status === 'flew' ? 'text-green-700 dark:text-green-300' :
+                                                    ey111.status === 'not_scheduled' ? 'text-gray-600 dark:text-gray-400' :
+                                                    'text-red-700 dark:text-red-300'
                                                 }`}>
-                                                    {ey111.status === 'flew' ? 'FLEW' : 'CANC'}
+                                                    {ey111.status === 'flew' ? 'FLEW' : ey111.status === 'not_scheduled' ? 'NOT SCHED' : 'CANC'}
                                                 </div>
                                                 {ey111.time && (
                                                     <>
@@ -468,9 +685,6 @@
                                                             <div className="text-xs text-orange-600 font-semibold">+{ey111.delay}m</div>
                                                         )}
                                                     </>
-                                                )}
-                                                {ey111.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && (
-                                                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">Click for details</div>
                                                 )}
                                             </div>
                                         )}
@@ -579,58 +793,6 @@
                         </div>
                     </div>
 
-                    <RouteMap />
-
-                    {/* Cancellation Details Modal */}
-                    {modal && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-                            onClick={() => setModal(null)}
-                        >
-                            <div
-                                className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 max-w-lg"
-                                onClick={e => e.stopPropagation()}
-                            >
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            {modal.flight} Cancellation
-                                        </h2>
-                                        <p className="text-gray-600 dark:text-gray-400">
-                                            {new Date(modal.date).toLocaleDateString('en-US', {
-                                                weekday: 'long',
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => setModal(null)}
-                                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-
-                                <div className="bg-red-50 dark:bg-red-950 border-l-4 border-red-600 p-4 rounded">
-                                    <p className="text-gray-900 dark:text-white font-semibold mb-2">
-                                        Reason for Cancellation:
-                                    </p>
-                                    <p className="text-gray-700 dark:text-gray-300">
-                                        {modal.reason}
-                                    </p>
-                                </div>
-
-                                <button
-                                    onClick={() => setModal(null)}
-                                    className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
             );
         }
