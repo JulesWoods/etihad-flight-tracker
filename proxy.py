@@ -10,6 +10,9 @@ from flask_cors import CORS
 import requests
 import sys
 import os
+from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +20,107 @@ CORS(app)
 OPENSKY_BASE = "https://opensky-network.org/api"
 OPENSKY_USER = os.environ.get('OPENSKY_USER')
 OPENSKY_PASS = os.environ.get('OPENSKY_PASS')
+
+AVIATIONSTACK_KEY = "8e092a48cae2106ab1d4880d426cffc0"
+AVIATIONSTACK_BASE = "http://api.aviationstack.com/v1"
+
+@app.route('/aviationstack/flights')
+def aviationstack_flights():
+    """Get flight data from AviationStack"""
+    flight_iata = request.args.get('flight_iata')  # e.g., "EY461"
+    flight_date = request.args.get('flight_date')  # Optional YYYY-MM-DD
+
+    if not flight_iata:
+        return jsonify({"error": "Missing flight_iata parameter"}), 400
+
+    try:
+        # Note: Free tier only supports current/future flights
+        # Historical data requires paid plan
+        url = f"{AVIATIONSTACK_BASE}/flights"
+        params = {
+            'access_key': AVIATIONSTACK_KEY,
+            'flight_iata': flight_iata,
+            'limit': 100
+        }
+
+        if flight_date:
+            params['flight_date'] = flight_date
+
+        response = requests.get(url, params=params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+
+        # Convert to format expected by frontend
+        flights = []
+        if 'data' in data:
+            for flight in data['data']:
+                if flight.get('departure'):
+                    dep = flight['departure']
+                    flights.append({
+                        'date': flight.get('flight_date'),
+                        'time': dep.get('actual') or dep.get('scheduled'),
+                        'origin': dep.get('iata'),
+                        'destination': flight.get('arrival', {}).get('iata'),
+                        'status': 'flew' if dep.get('actual') else 'scheduled'
+                    })
+
+        return jsonify({'flights': flights, 'raw': data})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/flightaware/history')
+def flightaware_history():
+    """Scrape FlightAware for flight history"""
+    flight_number = request.args.get('flight')  # e.g., "ETD461"
+    days = int(request.args.get('days', 30))
+
+    if not flight_number:
+        return jsonify({"error": "Missing flight parameter"}), 400
+
+    flights = []
+
+    try:
+        # FlightAware flight history page
+        url = f"https://flightaware.com/live/flight/{flight_number}"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        }
+
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Look for flight history data in the page
+        # FlightAware shows recent flights in a table
+        # This is a simplified scraper - may need adjustment based on actual page structure
+
+        # Try to find JSON data embedded in page
+        scripts = soup.find_all('script')
+        for script in scripts:
+            if script.string and 'trackpollBootstrap' in script.string:
+                # Extract flight data from the bootstrap JSON
+                import json
+                match = re.search(r'trackpollBootstrap\s*=\s*({.*?});', script.string, re.DOTALL)
+                if match:
+                    try:
+                        data = json.loads(match.group(1))
+                        if 'flights' in data:
+                            for flight in data['flights']:
+                                flights.append({
+                                    'date': flight.get('filed_departuretime'),
+                                    'origin': flight.get('origin'),
+                                    'destination': flight.get('destination'),
+                                    'status': flight.get('status')
+                                })
+                    except:
+                        pass
+
+        return jsonify(flights)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/flights/departure')
 def proxy_flights():
