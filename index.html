@@ -13,6 +13,22 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        const { useState } = React;
+
+        const CANCELLATION_REASONS = {
+            '2026-02-28': 'Iran-US-Israel war began. Etihad suspended all operations.',
+            '2026-03-01': 'AUH airport directly struck by Iranian missiles. Airport closed.',
+            '2026-03-02': 'Airport damage assessment ongoing. All flights grounded.',
+            '2026-03-03': 'Continued suspension due to ongoing missile attacks on UAE.',
+            '2026-03-04': 'Security assessment ongoing. Airport partially operational but Etihad grounded.',
+            '2026-03-05': 'Final day of total suspension before limited resumption.',
+            '2026-03-09': 'Sporadic cancellation during early recovery period. Limited aircraft/crew availability.',
+            '2026-03-11': 'Individual cancellation during gradual service restoration.',
+            '2026-03-15': 'Operational constraints during conflict. Limited route capacity.',
+            '2026-03-21': 'Crew/aircraft positioning issues during recovery phase.',
+            '2026-03-23': 'Individual cancellation during conflict recovery period.'
+        };
+
         const FLIGHTS = {
             '2026-02-26': [
                 { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:10', delay: 0 },
@@ -129,6 +145,8 @@
         };
 
         function App() {
+            const [modal, setModal] = useState(null);
+
             const start = new Date('2026-02-26');
             const end = new Date('2026-05-02');
 
@@ -236,9 +254,16 @@
                                         </div>
 
                                         {ey461 && (
-                                            <div className={`mb-2 p-1 rounded ${
-                                                ey461.status === 'flew' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'
-                                            }`}>
+                                            <div
+                                                className={`mb-2 p-1 rounded ${
+                                                    ey461.status === 'flew' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900 cursor-pointer hover:bg-red-200 dark:hover:bg-red-800'
+                                                }`}
+                                                onClick={() => ey461.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && setModal({
+                                                    flight: 'EY461',
+                                                    date: day.dateStr,
+                                                    reason: CANCELLATION_REASONS[day.dateStr]
+                                                })}
+                                            >
                                                 <div className="text-xs font-bold text-gray-900 dark:text-white">EY461</div>
                                                 <div className={`text-xs font-bold ${
                                                     ey461.status === 'flew' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
@@ -253,13 +278,23 @@
                                                         )}
                                                     </>
                                                 )}
+                                                {ey461.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && (
+                                                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">Click for details</div>
+                                                )}
                                             </div>
                                         )}
 
                                         {ey111 && (
-                                            <div className={`p-1 rounded ${
-                                                ey111.status === 'flew' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'
-                                            }`}>
+                                            <div
+                                                className={`p-1 rounded ${
+                                                    ey111.status === 'flew' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900 cursor-pointer hover:bg-red-200 dark:hover:bg-red-800'
+                                                }`}
+                                                onClick={() => ey111.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && setModal({
+                                                    flight: 'EY111',
+                                                    date: day.dateStr,
+                                                    reason: CANCELLATION_REASONS[day.dateStr]
+                                                })}
+                                            >
                                                 <div className="text-xs font-bold text-gray-900 dark:text-white">EY111</div>
                                                 <div className={`text-xs font-bold ${
                                                     ey111.status === 'flew' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
@@ -274,6 +309,9 @@
                                                         )}
                                                     </>
                                                 )}
+                                                {ey111.status === 'cancelled' && CANCELLATION_REASONS[day.dateStr] && (
+                                                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">Click for details</div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -281,6 +319,57 @@
                             })}
                         </div>
                     </div>
+
+                    {/* Cancellation Details Modal */}
+                    {modal && (
+                        <div
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                            onClick={() => setModal(null)}
+                        >
+                            <div
+                                className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 max-w-lg"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            {modal.flight} Cancellation
+                                        </h2>
+                                        <p className="text-gray-600 dark:text-gray-400">
+                                            {new Date(modal.date).toLocaleDateString('en-US', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setModal(null)}
+                                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                <div className="bg-red-50 dark:bg-red-950 border-l-4 border-red-600 p-4 rounded">
+                                    <p className="text-gray-900 dark:text-white font-semibold mb-2">
+                                        Reason for Cancellation:
+                                    </p>
+                                    <p className="text-gray-700 dark:text-gray-300">
+                                        {modal.reason}
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => setModal(null)}
+                                    className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
