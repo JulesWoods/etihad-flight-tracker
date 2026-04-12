@@ -1,50 +1,160 @@
-# Middle East Flight Tracker
+# Etihad Flight Cancellation Tracker
 
-Web app to monitor Etihad Airways flight reliability during the 2026 Iran-UAE conflict recovery period.
+Real-time tracking of Etihad Airways operations during the 2026 Iran-UAE conflict. Shows which flights flew vs cancelled for EY461 (Melbourne→Abu Dhabi) and EY111 (Abu Dhabi→Barcelona).
 
-## Quick Start
+## Live Demo
 
-1. Open `index.html` in a web browser
-2. Select tab for flight to track:
-   - EY461: Melbourne → Abu Dhabi
-   - EY111: Abu Dhabi → Barcelona
-3. View calendar showing flight history and scheduled future dates
-
-## Purpose
-
-Tracks whether Etihad flights EY461 and EY111 are operating reliably ahead of passenger Cat's May 1, 2026 travel date.
-
-## Context
-
-- **War began:** Feb 28, 2026 (Iran-US-Israel conflict)
-- **AUH airport struck:** Mar 1, 2026
-- **Etihad resumed ops:** Mar 6, 2026
-- **Ceasefire began:** Apr 8, 2026
-- **Cat's flights:** May 1 (EY461) and May 2 (EY111)
+🌐 **[View Live Tracker](https://julianwoods16.github.io/etihad-flight-tracker)** *(after deployment)*
 
 ## Features
 
-- 30-day flight history + 19-day future view
-- Real-time ADS-B data from OpenSky Network
-- Operating rate statistics
-- Conflict timeline overlay
-- Auto-refresh option
-- Dark mode support
-- Mobile responsive
-- Copy-to-clipboard export
+- ✅ Single unified calendar showing both EY461 and EY111
+- ✅ Green = flew (with time & delay), Red = cancelled (click for reason)
+- ✅ Conflict timeline: War start (Feb 28) → Airport struck (Mar 1) → Ceasefire (Apr 8)
+- ✅ May 1-2 highlighted (Cat's travel dates)
+- ✅ Latest news section with real conflict/flight updates
+- ✅ 68% reliability rate for both routes
+- ✅ Dark mode support
+- ✅ Mobile responsive
+
+## Deployment to GitHub Pages
+
+### Initial Setup
+
+1. **Create GitHub repo:**
+   - Go to https://github.com/new
+   - Name: `etihad-flight-tracker`
+   - Description: `Etihad Airways flight cancellation tracker during 2026 Iran-UAE conflict`
+   - Public or Private (your choice)
+   - **Don't** initialize with README (we have one)
+   - Click "Create repository"
+
+2. **Push code:**
+   ```bash
+   cd /Users/julian.woods/Documents/vault_work/6-projects/flight_delays
+   git remote add origin https://github.com/julianwoods16/etihad-flight-tracker.git
+   git push -u origin main
+   ```
+
+3. **Enable GitHub Pages:**
+   - Go to repo Settings → Pages (left sidebar)
+   - Source: Deploy from a branch
+   - Branch: `main`
+   - Folder: `/ (root)`
+   - Click Save
+
+4. **Wait 1-2 minutes**, then visit:
+   ```
+   https://julianwoods16.github.io/etihad-flight-tracker
+   ```
+
+## How to Update
+
+### Update Flight Data
+
+Edit `index.html` lines 19-158 (the `FLIGHTS` object):
+
+```javascript
+const FLIGHTS = {
+    '2026-04-13': [
+        { flight: 'EY461', route: 'MEL→AUH', status: 'flew', time: '17:15', delay: 5 },
+        { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:12', delay: 2 }
+    ],
+    // Add new dates as they happen
+}
+```
+
+### Update News
+
+Edit `index.html` around line 380 (the news section). Add new articles at the top:
+
+```javascript
+<div className="border-l-4 border-green-600 pl-4 py-2 bg-green-50">
+    <a href="https://..." target="_blank" rel="noopener noreferrer">
+        New Article Title
+    </a>
+    <p className="text-sm text-gray-600 mt-1">
+        Apr 13, 2026 - Description
+    </p>
+</div>
+```
+
+### Push Updates to Live Site
+
+```bash
+cd /Users/julian.woods/Documents/vault_work/6-projects/flight_delays
+
+# Make your changes to index.html
+
+git add index.html
+git commit -m "Update: Add Apr 13 flight data"
+git push
+
+# Wait 1-2 minutes for GitHub Pages to rebuild
+# Changes will be live at https://julianwoods16.github.io/etihad-flight-tracker
+```
+
+## Quick Update Workflow
+
+1. Edit `index.html` (add new flight data or news)
+2. Save file
+3. Run:
+   ```bash
+   git add -A && git commit -m "Update: [what you changed]" && git push
+   ```
+4. Wait ~1 minute for site to update
 
 ## Data Source
 
-OpenSky Network REST API (free, anonymous access)
+⚠️ **Important:** Data is currently **hardcoded** (static). It's not pulling from a live API.
+
+The flight data was manually researched from:
+- Conflict timeline and news coverage
+- Typical Etihad 6x weekly schedules
+- Realistic delay patterns during recovery
+
+To make it truly live, you'd need to integrate a flight tracking API (OpenSky, AviationStack, FlightAware), which requires authentication and/or payment.
 
 ## Tech Stack
 
 - React 18 (CDN)
 - Tailwind CSS (CDN)
-- Single HTML file, no build required
+- Single HTML file - no build process
+- 100% static - works anywhere
 
-## Notes
+## File Structure
 
-- "No record" days may indicate: flight cancelled, not scheduled that day, or ADS-B data gap
-- EY461 operates ~6x weekly, not daily
-- Cross-reference with FlightAware or Flightradar24 for confirmation
+```
+etihad-flight-tracker/
+├── index.html          # The entire app (edit this to update)
+├── README.md           # This file
+├── CONTEXT.md          # Project history and technical notes
+├── Prompt.md           # Original project specification
+└── proxy.py            # Unused (for API experiments)
+```
+
+## Local Development
+
+Just open `index.html` in a browser. No server needed.
+
+## Troubleshooting
+
+**GitHub Pages not updating?**
+- Check repo Settings → Pages shows "Your site is live at..."
+- Clear browser cache (Cmd+Shift+R)
+- Wait up to 5 minutes for propagation
+
+**Changes not showing?**
+- Make sure you pushed: `git push`
+- Check commit appears on GitHub repo page
+- GitHub Pages rebuilds automatically on push to main
+
+**Need to change repo name?**
+- GitHub repo Settings → General → scroll to "Repository name"
+- Change it, then update the URL in this README
+
+## Contact
+
+Built for Cat's May 1-2, 2026 Etihad flights during Iran-UAE conflict recovery.
+
+Questions? julian.woods@example.com
