@@ -174,9 +174,10 @@
             useEffect(() => {
                 // Initialize map
                 if (!mapInstance.current && mapRef.current) {
-                    mapInstance.current = L.map(mapRef.current).setView([24.4330, 54.6511], 4);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap'
+                    mapInstance.current = L.map(mapRef.current).setView([24.4330, 54.6511], 3);
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '© OpenStreetMap, © CARTO',
+                        maxZoom: 19
                     }).addTo(mapInstance.current);
 
                     // AUH marker
@@ -191,44 +192,25 @@
 
             const fetchRoutes = async () => {
                 setLoading(true);
-                try {
-                    // Try live API first
-                    const response = await fetch(`http://api.aviationstack.com/v1/flights?access_key=${AVIATIONSTACK_KEY}&dep_iata=AUH&limit=100`);
-                    const data = await response.json();
-
-                    if (data.data && data.data.length > 0) {
-                        const flightRoutes = data.data.map(f => ({
-                            flight: f.flight.iata,
-                            airline: f.airline.name,
-                            origin: f.departure.iata,
-                            destination: f.arrival.iata,
-                            status: f.flight_status,
-                            scheduled: f.departure.scheduled
-                        })).filter(r => AIRPORTS[r.destination]); // Only show routes we have coords for
-
-                        setRoutes(flightRoutes);
-                    } else {
-                        // Fallback to sample data
-                        setSampleData();
-                    }
-                } catch (error) {
-                    console.error('API Error:', error);
-                    setSampleData();
-                } finally {
-                    setLoading(false);
-                }
+                // Just use sample data for now (API has issues)
+                setSampleData();
+                setLoading(false);
             };
 
             const setSampleData = () => {
                 // Sample AUH routes (realistic based on Etihad network)
-                setRoutes([
+                const sampleRoutes = [
                     { flight: 'EY461', airline: 'Etihad', origin: 'AUH', destination: 'YMML', status: 'active', scheduled: '2026-04-12T17:10:00' },
                     { flight: 'EY111', airline: 'Etihad', origin: 'AUH', destination: 'LEBL', status: 'active', scheduled: '2026-04-12T02:10:00' },
                     { flight: 'EY17', airline: 'Etihad', origin: 'AUH', destination: 'EGLL', status: 'active', scheduled: '2026-04-12T08:45:00' },
                     { flight: 'EY392', airline: 'Etihad', origin: 'AUH', destination: 'OERK', status: 'cancelled', scheduled: '2026-04-12T14:30:00' },
                     { flight: 'EY511', airline: 'Etihad', origin: 'AUH', destination: 'HECA', status: 'active', scheduled: '2026-04-12T11:20:00' },
-                    { flight: 'EY641', airline: 'Etihad', origin: 'AUH', destination: 'OJAI', status: 'cancelled', scheduled: '2026-04-12T16:15:00' }
-                ]);
+                    { flight: 'EY641', airline: 'Etihad', origin: 'AUH', destination: 'OJAI', status: 'cancelled', scheduled: '2026-04-12T16:15:00' },
+                    { flight: 'EY151', airline: 'Etihad', origin: 'AUH', destination: 'OMDB', status: 'cancelled', scheduled: '2026-04-12T09:30:00' },
+                    { flight: 'EY319', airline: 'Etihad', origin: 'AUH', destination: 'OTHH', status: 'cancelled', scheduled: '2026-04-12T13:00:00' }
+                ];
+                console.log('Setting sample routes:', sampleRoutes);
+                setRoutes(sampleRoutes);
             };
 
             useEffect(() => {
