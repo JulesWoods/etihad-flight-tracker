@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat's Etihad Flights - Conflict Tracker</title>
+    <title>Etihad Flight Cancellation Tracker - 2026 Conflict</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -185,12 +185,27 @@
             return (
                 <div className="max-w-7xl mx-auto">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 mb-6">
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                            Cat's Etihad Flights - 2026 Conflict Impact
+                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                            Etihad Flight Cancellation Tracker
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            Feb 28: War | Mar 1: AUH Struck | Mar 6: Resume | Apr 8: Ceasefire | May 1-2: Cat's Travel
+                        <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                            Real-time tracking of Etihad Airways operations during the 2026 Iran-UAE conflict.
+                            This tool shows which flights flew vs cancelled for EY461 (Melbourne→Abu Dhabi) and EY111 (Abu Dhabi→Barcelona)
+                            to help assess reliability for Cat's May 1-2 travel.
                         </p>
+                        <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Feb 28: War begins</span>
+                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Mar 1: AUH struck</span>
+                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Mar 6: Ops resume</span>
+                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Apr 8: Ceasefire</span>
+                            <span className="bg-purple-100 dark:bg-purple-900 px-3 py-1 rounded font-semibold">May 1-2: Cat's flights ⭐</span>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-600 p-3 rounded">
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                                <strong>How it works:</strong> Green = flight operated with time & delay. Red = cancelled (click for reason).
+                                Each day shows both EY461 and EY111. Purple ring marks Cat's travel dates. Scroll down for latest news updates.
+                            </p>
+                        </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                             <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-3">
