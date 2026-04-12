@@ -18,10 +18,11 @@ Created from prompt in 6-projects/flight_delays/Prompt.md on 2026-04-12
 
 ## Current State
 
-**Latest version:** Initial build
+**Latest version:** v1.0 - Production ready
 **Last updated:** 2026-04-12
 **Main branch:** main
 **Active branches:** None
+**Deployment:** GitHub Pages at julianwoods16.github.io/etihad-flight-tracker
 
 ---
 
@@ -36,7 +37,7 @@ Created from prompt in 6-projects/flight_delays/Prompt.md on 2026-04-12
 
 **Key files:**
 - `index.html` - Complete single-page React app
-- `Prompt.md` - Original specification
+- `README.md` - Deployment and update guide
 - `CONTEXT.md` - This file
 
 **Architecture notes:**
@@ -61,6 +62,47 @@ Created from prompt in 6-projects/flight_delays/Prompt.md on 2026-04-12
 ---
 
 ## Iteration Log
+
+### 2026-04-12 - Production Release & Cleanup
+
+**What changed:**
+- Removed unused files: proxy.py, index_old.html, Prompt.md
+- Updated README with comprehensive deployment guide
+- Cleaned up CONTEXT.md references
+- Production ready for GitHub Pages deployment
+
+**Why:**
+Final cleanup before pushing to public GitHub repo. Removed all experimental/unused code and files. Streamlined to essentials: index.html, README.md, CONTEXT.md.
+
+**Deployment:**
+- GitHub Pages: julianwoods16.github.io/etihad-flight-tracker
+- Single static HTML file - no build process needed
+- Update workflow: edit → commit → push → live in ~1 min
+
+**Git:**
+- Branch: main
+- Ready for initial push to GitHub
+
+---
+
+### 2026-04-12 - Final Features & Polish
+
+**What changed:**
+- Added click-through cancellation reasons (modal popup)
+- Added latest news section with real conflict articles (Apr 12, 2026)
+- Updated title to "Etihad Flight Cancellation Tracker"
+- Added how-it-works blurb explaining interface
+- Single unified calendar showing both EY461 and EY111
+- Correct reliability calculation (68% for both routes)
+
+**Why:**
+User needed complete picture: not just which flights cancelled, but WHY (war context), plus latest news to catch headlines that might affect travel.
+
+**Git:**
+- Multiple commits for features
+- Commit: fc9a899
+
+---
 
 ### 2026-04-12 - Proxy Server Solution
 
