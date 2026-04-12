@@ -55,8 +55,50 @@
 
         const CAT_FLIGHT_DATE = '2026-05-01';
 
+        // Sample data for demo mode (realistic flight patterns)
+        const SAMPLE_DATA = {
+            EY461: {
+                // ~6x weekly operation, gaps during conflict
+                '2026-03-13': { date: '2026-03-13', time: '17:15', status: 'flew' },
+                '2026-03-15': { date: '2026-03-15', time: '17:05', status: 'flew' },
+                '2026-03-17': { date: '2026-03-17', time: '17:20', status: 'flew' },
+                '2026-03-19': { date: '2026-03-19', time: '17:10', status: 'flew' },
+                '2026-03-21': { date: '2026-03-21', time: '17:12', status: 'flew' },
+                '2026-03-23': { date: '2026-03-23', time: '17:18', status: 'flew' },
+                '2026-03-25': { date: '2026-03-25', time: '17:08', status: 'flew' },
+                '2026-03-27': { date: '2026-03-27', time: '17:14', status: 'flew' },
+                '2026-03-29': { date: '2026-03-29', time: '17:11', status: 'flew' },
+                '2026-03-31': { date: '2026-03-31', time: '17:16', status: 'flew' },
+                '2026-04-02': { date: '2026-04-02', time: '17:09', status: 'flew' },
+                '2026-04-04': { date: '2026-04-04', time: '17:13', status: 'flew' },
+                '2026-04-06': { date: '2026-04-06', time: '17:07', status: 'flew' },
+                '2026-04-08': { date: '2026-04-08', time: '17:19', status: 'flew' },
+                '2026-04-10': { date: '2026-04-10', time: '17:12', status: 'flew' },
+                '2026-04-11': { date: '2026-04-11', time: '17:15', status: 'flew' }
+            },
+            EY111: {
+                // ~6x weekly operation
+                '2026-03-14': { date: '2026-03-14', time: '02:08', status: 'flew' },
+                '2026-03-16': { date: '2026-03-16', time: '02:12', status: 'flew' },
+                '2026-03-18': { date: '2026-03-18', time: '02:15', status: 'flew' },
+                '2026-03-20': { date: '2026-03-20', time: '02:09', status: 'flew' },
+                '2026-03-22': { date: '2026-03-22', time: '02:11', status: 'flew' },
+                '2026-03-24': { date: '2026-03-24', time: '02:14', status: 'flew' },
+                '2026-03-26': { date: '2026-03-26', time: '02:10', status: 'flew' },
+                '2026-03-28': { date: '2026-03-28', time: '02:13', status: 'flew' },
+                '2026-03-30': { date: '2026-03-30', time: '02:16', status: 'flew' },
+                '2026-04-01': { date: '2026-04-01', time: '02:08', status: 'flew' },
+                '2026-04-03': { date: '2026-04-03', time: '02:11', status: 'flew' },
+                '2026-04-05': { date: '2026-04-05', time: '02:09', status: 'flew' },
+                '2026-04-07': { date: '2026-04-07', time: '02:14', status: 'flew' },
+                '2026-04-09': { date: '2026-04-09', time: '02:12', status: 'flew' },
+                '2026-04-11': { date: '2026-04-11', time: '02:10', status: 'flew' }
+            }
+        };
+
         function FlightTracker() {
             const [selectedFlight, setSelectedFlight] = useState('EY461');
+            const [demoMode, setDemoMode] = useState(false);
             const [flightData, setFlightData] = useState({});
             const [loading, setLoading] = useState(false);
             const [error, setError] = useState(null);
@@ -117,6 +159,15 @@
                 const { startDate, endDate } = getDateRange();
 
                 try {
+                    // Use sample data in demo mode
+                    if (demoMode) {
+                        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
+                        setFlightData(prev => ({ ...prev, [flightKey]: SAMPLE_DATA[flightKey] || {} }));
+                        setLastUpdated(new Date());
+                        setLoading(false);
+                        return;
+                    }
+
                     const flights = {};
 
                     // Split into 7-day chunks
@@ -129,29 +180,22 @@
                         const beginUnix = Math.floor(currentStart.getTime() / 1000);
                         const endUnix = Math.floor(Math.min(currentEnd.getTime(), endDate.getTime()) / 1000);
 
-                        const url = `https://opensky-network.org/api/flights/departure?airport=${flight.origin}&begin=${beginUnix}&end=${endUnix}`;
+                        // Use local proxy server
+                        const proxyUrl = `http://localhost:5000/flights/departure?airport=${flight.origin}&begin=${beginUnix}&end=${endUnix}`;
 
-                        // Try CORS proxies in order
                         let data = null;
-                        const proxies = [
-                            `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                            `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
-                        ];
-
-                        for (const proxyUrl of proxies) {
-                            try {
-                                const response = await fetch(proxyUrl);
-                                if (response.ok) {
-                                    data = await response.json();
-                                    break;
-                                }
-                            } catch (e) {
-                                continue;
+                        try {
+                            const response = await fetch(proxyUrl);
+                            if (!response.ok) {
+                                throw new Error(`Proxy error: ${response.status}`);
                             }
+                            data = await response.json();
+                        } catch (e) {
+                            throw new Error(`Proxy server not running. Start it with: python3 proxy.py`);
                         }
 
                         if (!data) {
-                            throw new Error('All CORS proxies failed');
+                            throw new Error('No data received from proxy');
                         }
 
                         // Filter for this flight's callsigns
@@ -172,8 +216,8 @@
                         currentStart = new Date(currentEnd);
                         currentStart.setDate(currentStart.getDate() + 1);
 
-                        // Small delay to avoid rate limiting
-                        await new Promise(resolve => setTimeout(resolve, 200));
+                        // Delay to avoid rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 1000));
                     }
 
                     setFlightData(prev => ({ ...prev, [flightKey]: flights }));
@@ -184,7 +228,7 @@
                 } finally {
                     setLoading(false);
                 }
-            }, []);
+            }, [demoMode]);
 
             // Auto-refresh effect
             useEffect(() => {
@@ -302,7 +346,20 @@
                                     Etihad Airways reliability during 2026 conflict recovery
                                 </p>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                                <button
+                                    onClick={() => {
+                                        setDemoMode(!demoMode);
+                                        setFlightData({});
+                                    }}
+                                    className={`px-4 py-2 rounded font-semibold ${
+                                        demoMode
+                                            ? 'bg-purple-500 text-white'
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                    }`}
+                                >
+                                    {demoMode ? '📊 Demo Mode' : '🌐 Live Mode'}
+                                </button>
                                 <button
                                     onClick={() => setDarkMode(!darkMode)}
                                     className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -337,6 +394,19 @@
                                 </button>
                             ))}
                         </div>
+
+                        {/* Demo mode banner */}
+                        {demoMode && (
+                            <div className="bg-purple-100 dark:bg-purple-900/30 border-l-4 border-purple-500 p-4 rounded mb-6">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-purple-600 dark:text-purple-400 text-xl">📊</span>
+                                    <div className="text-sm text-purple-900 dark:text-purple-200">
+                                        <strong>Demo Mode Active</strong> - Showing sample data for demonstration.
+                                        Click "Demo Mode" button to try live API (may fail due to CORS/rate limits).
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Status bar */}
                         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow">
@@ -394,9 +464,20 @@
                         {/* Error message */}
                         {error && (
                             <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 px-4 py-3 rounded mb-6">
-                                <p className="font-semibold">Error: {error}</p>
-                                <p className="text-sm mt-2">
-                                    OpenSky unreachable — check manually at{' '}
+                                <p className="font-semibold mb-2">{error}</p>
+                                {error.includes('authentication') && (
+                                    <div className="text-sm mt-3 bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded border border-yellow-400">
+                                        <p className="font-semibold mb-2">OpenSky requires a free account:</p>
+                                        <ol className="list-decimal ml-4 space-y-1">
+                                            <li>Create account at <a href="https://opensky-network.org" target="_blank" rel="noopener noreferrer" className="underline">opensky-network.org</a></li>
+                                            <li>Stop proxy: <code className="bg-gray-800 text-white px-2 py-1 rounded">pkill -f proxy.py</code></li>
+                                            <li>Restart with credentials: <code className="bg-gray-800 text-white px-2 py-1 rounded">OPENSKY_USER=your_username OPENSKY_PASS=your_password python3 proxy.py &</code></li>
+                                            <li>Refresh this page</li>
+                                        </ol>
+                                    </div>
+                                )}
+                                <p className="text-sm mt-3">
+                                    Or check manually at{' '}
                                     <a
                                         href={`https://flightaware.com/live/flight/${flight.callsigns[0]}`}
                                         target="_blank"
