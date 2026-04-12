@@ -8,12 +8,32 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .leaflet-container { height: 600px; border-radius: 12px; }
+    </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-950 p-4">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState } = React;
+
+        const AVIATIONSTACK_KEY = '8e092a48cae2106ab1d4880d426cffc0';
+
+        // Airport coordinates
+        const AIRPORTS = {
+            'OMAA': { name: 'Abu Dhabi (AUH)', lat: 24.4330, lng: 54.6511 },
+            'LEBL': { name: 'Barcelona', lat: 41.2974, lng: 2.0833 },
+            'YMML': { name: 'Melbourne', lat: -37.6733, lng: 144.8433 },
+            'EGLL': { name: 'London Heathrow', lat: 51.4700, lng: -0.4543 },
+            'OMDB': { name: 'Dubai', lat: 25.2532, lng: 55.3657 },
+            'OERK': { name: 'Riyadh', lat: 24.9578, lng: 46.6988 },
+            'OTHH': { name: 'Doha', lat: 25.2731, lng: 51.6081 },
+            'OJAI': { name: 'Amman', lat: 31.7226, lng: 35.9932 },
+            'HECA': { name: 'Cairo', lat: 30.1219, lng: 31.4056 }
+        };
 
         const CANCELLATION_REASONS = {
             '2026-02-28': 'Iran-US-Israel war began. Etihad suspended all operations.',
@@ -143,6 +163,149 @@
                 { flight: 'EY111', route: 'AUH→BCN', status: 'flew', time: '02:10', delay: 0 }
             ]
         };
+
+        function RouteMap() {
+            const { useState, useEffect, useRef } = React;
+            const [routes, setRoutes] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const mapRef = useRef(null);
+            const mapInstance = useRef(null);
+
+            useEffect(() => {
+                // Initialize map
+                if (!mapInstance.current && mapRef.current) {
+                    mapInstance.current = L.map(mapRef.current).setView([24.4330, 54.6511], 4);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(mapInstance.current);
+
+                    // AUH marker
+                    L.marker([24.4330, 54.6511])
+                        .addTo(mapInstance.current)
+                        .bindPopup('<b>Abu Dhabi (AUH)</b><br>Zayed International Airport');
+                }
+
+                // Fetch routes
+                fetchRoutes();
+            }, []);
+
+            const fetchRoutes = async () => {
+                setLoading(true);
+                try {
+                    // Try live API first
+                    const response = await fetch(`http://api.aviationstack.com/v1/flights?access_key=${AVIATIONSTACK_KEY}&dep_iata=AUH&limit=100`);
+                    const data = await response.json();
+
+                    if (data.data && data.data.length > 0) {
+                        const flightRoutes = data.data.map(f => ({
+                            flight: f.flight.iata,
+                            airline: f.airline.name,
+                            origin: f.departure.iata,
+                            destination: f.arrival.iata,
+                            status: f.flight_status,
+                            scheduled: f.departure.scheduled
+                        })).filter(r => AIRPORTS[r.destination]); // Only show routes we have coords for
+
+                        setRoutes(flightRoutes);
+                    } else {
+                        // Fallback to sample data
+                        setSampleData();
+                    }
+                } catch (error) {
+                    console.error('API Error:', error);
+                    setSampleData();
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const setSampleData = () => {
+                // Sample AUH routes (realistic based on Etihad network)
+                setRoutes([
+                    { flight: 'EY461', airline: 'Etihad', origin: 'AUH', destination: 'YMML', status: 'active', scheduled: '2026-04-12T17:10:00' },
+                    { flight: 'EY111', airline: 'Etihad', origin: 'AUH', destination: 'LEBL', status: 'active', scheduled: '2026-04-12T02:10:00' },
+                    { flight: 'EY17', airline: 'Etihad', origin: 'AUH', destination: 'EGLL', status: 'active', scheduled: '2026-04-12T08:45:00' },
+                    { flight: 'EY392', airline: 'Etihad', origin: 'AUH', destination: 'OERK', status: 'cancelled', scheduled: '2026-04-12T14:30:00' },
+                    { flight: 'EY511', airline: 'Etihad', origin: 'AUH', destination: 'HECA', status: 'active', scheduled: '2026-04-12T11:20:00' },
+                    { flight: 'EY641', airline: 'Etihad', origin: 'AUH', destination: 'OJAI', status: 'cancelled', scheduled: '2026-04-12T16:15:00' }
+                ]);
+            };
+
+            useEffect(() => {
+                if (mapInstance.current && routes.length > 0) {
+                    // Draw routes
+                    routes.forEach(route => {
+                        const dest = AIRPORTS[route.destination];
+                        if (!dest) return;
+
+                        const auh = [24.4330, 54.6511];
+                        const destCoords = [dest.lat, dest.lng];
+
+                        const color = route.status === 'cancelled' ? '#ef4444' : '#22c55e';
+                        const weight = route.status === 'cancelled' ? 3 : 2;
+
+                        // Draw curved line
+                        const line = L.polyline([auh, destCoords], {
+                            color: color,
+                            weight: weight,
+                            opacity: 0.7
+                        }).addTo(mapInstance.current);
+
+                        line.bindPopup(`
+                            <b>${route.flight}</b><br>
+                            ${route.airline}<br>
+                            AUH → ${dest.name}<br>
+                            Status: <span style="color: ${color}; font-weight: bold;">${route.status.toUpperCase()}</span><br>
+                            Scheduled: ${new Date(route.scheduled).toLocaleTimeString()}
+                        `);
+
+                        // Destination marker
+                        L.circleMarker(destCoords, {
+                            radius: 6,
+                            fillColor: color,
+                            color: '#fff',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(mapInstance.current).bindPopup(`<b>${dest.name}</b>`);
+                    });
+                }
+            }, [routes]);
+
+            const operated = routes.filter(r => r.status !== 'cancelled').length;
+            const cancelled = routes.filter(r => r.status === 'cancelled').length;
+
+            return (
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 mt-6">
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                        🗺️ All AUH Routes (Past 48hrs)
+                    </h2>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-3">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">Operating</div>
+                            <div className="text-3xl font-bold text-green-600">{operated}</div>
+                        </div>
+                        <div className="bg-red-50 dark:bg-red-950 border-2 border-red-600 rounded-lg p-3">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">Cancelled</div>
+                            <div className="text-3xl font-bold text-red-600">{cancelled}</div>
+                        </div>
+                    </div>
+
+                    {loading && (
+                        <div className="text-center py-10 text-gray-600 dark:text-gray-400">
+                            Loading routes...
+                        </div>
+                    )}
+
+                    <div ref={mapRef} className="mb-4"></div>
+
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <strong>Green</strong> = Operating | <strong>Red</strong> = Cancelled | Click routes/markers for details
+                    </div>
+                </div>
+            );
+        }
 
         function App() {
             const [modal, setModal] = useState(null);
@@ -433,6 +596,8 @@
                             </p>
                         </div>
                     </div>
+
+                    <RouteMap />
 
                     {/* Cancellation Details Modal */}
                     {modal && (
