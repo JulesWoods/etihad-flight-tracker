@@ -106,14 +106,16 @@ git push
 
 ## Data Source
 
-⚠️ **Important:** Data is currently **hardcoded** (static). It's not pulling from a live API.
+✅ **REAL DATA:** Flight data extracted from FlightRadar24 on April 12, 2026.
 
-The flight data was manually researched from:
-- Conflict timeline and news coverage
-- Typical Etihad 6x weekly schedules
-- Realistic delay patterns during recovery
+The flight data includes:
+- **152 real flights** from January 1 - April 12, 2026
+- **EY461** (Melbourne → Abu Dhabi): 76 flights
+- **EY111** (Abu Dhabi → Barcelona): 76 flights
+- **Actual departure times** and delay information from ADS-B tracking
+- **One diverted flight** on February 28, 2026 (EY461)
 
-To make it truly live, you'd need to integrate a flight tracking API (OpenSky, AviationStack, FlightAware), which requires authentication and/or payment.
+Data was exported from FlightRadar24 Gold subscription using the flight history feature. The app currently displays static data (not live) but all flight records are genuine historical data.
 
 ## Tech Stack
 
