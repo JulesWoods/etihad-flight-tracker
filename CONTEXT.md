@@ -62,6 +62,30 @@ Created from prompt in 6-projects/flight_delays/Prompt.md on 2026-04-12
 
 ## Iteration Log
 
+### 2026-04-12 - Proxy Server Solution
+
+**What changed:**
+- Created `proxy.py` - Local Flask server to proxy OpenSky API requests
+- Updated `index.html` to use localhost:5000 instead of public CORS proxies
+- Added authentication support (OPENSKY_USER and OPENSKY_PASS env vars)
+- Enhanced error messages with setup instructions
+- Added demo mode as fallback option
+
+**Why:**
+OpenSky Network API now requires authentication for the /flights/departure endpoint. All free public CORS proxies fail with 403 Forbidden. The single HTML file constraint prevents client-side authentication, so a local proxy server is the only viable solution.
+
+**Setup required:**
+1. Create free account at opensky-network.org
+2. Install dependencies: `pip3 install flask flask-cors requests`
+3. Run proxy: `OPENSKY_USER=username OPENSKY_PASS=password python3 proxy.py`
+4. Open index.html in browser
+
+**Git:**
+- Branch: main
+- Commit: 1162744
+
+---
+
 ### 2026-04-12 - Initial Creation
 
 **What was built:**
@@ -93,10 +117,12 @@ Created from prompt in 6-projects/flight_delays/Prompt.md on 2026-04-12
 
 ## Known Issues
 
-- [ ] OpenSky API has rate limits for anonymous access - may need to handle 429 responses
-- [ ] ADS-B data gaps possible - not all flights guaranteed to be tracked
+- [x] ~~OpenSky API has rate limits for anonymous access~~ - RESOLVED: Now requires authentication, proxy server handles this
+- [x] ~~CORS proxies can be unreliable~~ - RESOLVED: Using local proxy server instead
+- [ ] OpenSky authentication required - User must create free account and provide credentials
+- [ ] Proxy server must be running for app to work - Not a standalone single file anymore
+- [ ] ADS-B data gaps possible - Not all flights guaranteed to be tracked
 - [ ] EY461 operates ~6x weekly, not daily - "no record" days expected
-- [ ] CORS proxies can be unreliable - fallback to manual FlightAware check documented
 
 ---
 
