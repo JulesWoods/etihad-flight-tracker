@@ -580,57 +580,57 @@
             });
 
             return (
-                <div className="max-w-7xl mx-auto">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 mb-6">
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                <div className="max-w-7xl mx-auto px-2 sm:px-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
                             Etihad Flight Cancellation Tracker
                         </h1>
-                        <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                        <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">
                             Real-time tracking of Etihad Airways operations during the 2026 Iran-UAE conflict.
                             This tool shows which flights flew vs cancelled for EY461 (Melbourne→Abu Dhabi) and EY111 (Abu Dhabi→Barcelona)
                             to help assess reliability for Cat's May 1-2 travel.
                         </p>
-                        <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Feb 28: War begins</span>
-                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Mar 1: AUH struck</span>
-                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Mar 6: Ops resume</span>
-                            <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded">Apr 8: Ceasefire</span>
-                            <span className="bg-purple-100 dark:bg-purple-900 px-3 py-1 rounded font-semibold">May 1-2: Cat's flights ⭐</span>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
+                            <span className="bg-gray-100 dark:bg-gray-800 px-2 sm:px-3 py-1 rounded">Feb 28: War begins</span>
+                            <span className="bg-gray-100 dark:bg-gray-800 px-2 sm:px-3 py-1 rounded">Mar 1: AUH struck</span>
+                            <span className="bg-gray-100 dark:bg-gray-800 px-2 sm:px-3 py-1 rounded">Mar 6: Ops resume</span>
+                            <span className="bg-gray-100 dark:bg-gray-800 px-2 sm:px-3 py-1 rounded">Apr 8: Ceasefire</span>
+                            <span className="bg-purple-100 dark:bg-purple-900 px-2 sm:px-3 py-1 rounded font-semibold">May 1-2: Cat's flights ⭐</span>
                         </div>
-                        <div className="bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-600 p-3 rounded">
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                        <div className="bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-600 p-2.5 sm:p-3 rounded">
+                            <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                                 <strong>How it works:</strong> Green = flight operated with time & delay. Red = cancelled (click for reason).
                                 Each day shows both EY461 and EY111. Purple ring marks Cat's travel dates. Scroll down for latest news updates.
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                            <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-3">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                            <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-2 sm:p-3">
                                 <div className="text-xs text-gray-600 dark:text-gray-400">EY461 Operated</div>
-                                <div className="text-2xl font-bold text-green-600">{ey461Flew}</div>
+                                <div className="text-xl sm:text-2xl font-bold text-green-600">{ey461Flew}</div>
                             </div>
-                            <div className="bg-red-50 dark:bg-red-950 border-2 border-red-600 rounded-lg p-3">
+                            <div className="bg-red-50 dark:bg-red-950 border-2 border-red-600 rounded-lg p-2 sm:p-3">
                                 <div className="text-xs text-gray-600 dark:text-gray-400">EY461 Cancelled</div>
-                                <div className="text-2xl font-bold text-red-600">{ey461Canc}</div>
+                                <div className="text-xl sm:text-2xl font-bold text-red-600">{ey461Canc}</div>
                             </div>
-                            <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-3">
+                            <div className="bg-green-50 dark:bg-green-950 border-2 border-green-600 rounded-lg p-2 sm:p-3">
                                 <div className="text-xs text-gray-600 dark:text-gray-400">EY111 Operated</div>
-                                <div className="text-2xl font-bold text-green-600">{ey111Flew}</div>
+                                <div className="text-xl sm:text-2xl font-bold text-green-600">{ey111Flew}</div>
                             </div>
-                            <div className="bg-red-50 dark:bg-red-950 border-2 border-red-600 rounded-lg p-3">
+                            <div className="bg-red-50 dark:bg-red-950 border-2 border-red-600 rounded-lg p-2 sm:p-3">
                                 <div className="text-xs text-gray-600 dark:text-gray-400">EY111 Cancelled</div>
-                                <div className="text-2xl font-bold text-red-600">{ey111Canc}</div>
+                                <div className="text-xl sm:text-2xl font-bold text-red-600">{ey111Canc}</div>
                             </div>
                         </div>
 
                         {/* Calendar */}
-                        <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center mb-1 sm:mb-2">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                                <div key={d} className="text-sm font-bold text-gray-600 dark:text-gray-400 py-2">{d}</div>
+                                <div key={d} className="text-xs sm:text-sm font-bold text-gray-600 dark:text-gray-400 py-1 sm:py-2">{d}</div>
                             ))}
                         </div>
 
-                        <div className="grid grid-cols-7 gap-2">
+                        <div className="grid grid-cols-7 gap-1 sm:gap-2">
                             {padded.map((day, idx) => {
                                 if (!day) return <div key={`pad-${idx}`} />;
 
@@ -641,27 +641,27 @@
                                 return (
                                     <div
                                         key={day.dateStr}
-                                        className={`border-2 rounded-lg p-2 min-h-[140px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 ${
-                                            isCat ? 'ring-4 ring-purple-600 shadow-xl' : ''
+                                        className={`border rounded-lg sm:border-2 p-1 sm:p-2 min-h-[100px] sm:min-h-[140px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 ${
+                                            isCat ? 'ring-2 sm:ring-4 ring-purple-600 shadow-xl' : ''
                                         }`}
                                     >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                        <div className="flex justify-between items-start mb-1 sm:mb-2">
+                                            <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white">
                                                 {day.date.getDate()}
                                             </div>
-                                            {isCat && <div className="text-2xl">⭐</div>}
+                                            {isCat && <div className="text-lg sm:text-2xl">⭐</div>}
                                         </div>
 
                                         {ey461 && (
                                             <div
-                                                className={`mb-2 p-1 rounded ${
+                                                className={`mb-1 sm:mb-2 p-0.5 sm:p-1 rounded ${
                                                     ey461.status === 'flew' ? 'bg-green-100 dark:bg-green-900' :
                                                     ey461.status === 'not_scheduled' ? 'bg-gray-200 dark:bg-gray-700' :
                                                     'bg-red-100 dark:bg-red-900'
                                                 }`}
                                             >
-                                                <div className="text-xs font-bold text-gray-900 dark:text-white">EY461</div>
-                                                <div className={`text-xs font-bold ${
+                                                <div className="text-[10px] sm:text-xs font-bold text-gray-900 dark:text-white">EY461</div>
+                                                <div className={`text-[9px] sm:text-xs font-bold ${
                                                     ey461.status === 'flew' ? 'text-green-700 dark:text-green-300' :
                                                     ey461.status === 'not_scheduled' ? 'text-gray-600 dark:text-gray-400' :
                                                     'text-red-700 dark:text-red-300'
@@ -670,9 +670,9 @@
                                                 </div>
                                                 {ey461.time && (
                                                     <>
-                                                        <div className="text-xs font-mono font-bold text-gray-900 dark:text-white">{ey461.time}</div>
+                                                        <div className="text-[9px] sm:text-xs font-mono font-bold text-gray-900 dark:text-white">{ey461.time}</div>
                                                         {ey461.delay > 0 && (
-                                                            <div className="text-xs text-orange-600 font-semibold">+{ey461.delay}m</div>
+                                                            <div className="text-[9px] sm:text-xs text-orange-600 font-semibold">+{ey461.delay}m</div>
                                                         )}
                                                     </>
                                                 )}
@@ -681,14 +681,14 @@
 
                                         {ey111 && (
                                             <div
-                                                className={`p-1 rounded ${
+                                                className={`p-0.5 sm:p-1 rounded ${
                                                     ey111.status === 'flew' ? 'bg-green-100 dark:bg-green-900' :
                                                     ey111.status === 'not_scheduled' ? 'bg-gray-200 dark:bg-gray-700' :
                                                     'bg-red-100 dark:bg-red-900'
                                                 }`}
                                             >
-                                                <div className="text-xs font-bold text-gray-900 dark:text-white">EY111</div>
-                                                <div className={`text-xs font-bold ${
+                                                <div className="text-[10px] sm:text-xs font-bold text-gray-900 dark:text-white">EY111</div>
+                                                <div className={`text-[9px] sm:text-xs font-bold ${
                                                     ey111.status === 'flew' ? 'text-green-700 dark:text-green-300' :
                                                     ey111.status === 'not_scheduled' ? 'text-gray-600 dark:text-gray-400' :
                                                     'text-red-700 dark:text-red-300'
@@ -697,9 +697,9 @@
                                                 </div>
                                                 {ey111.time && (
                                                     <>
-                                                        <div className="text-xs font-mono font-bold text-gray-900 dark:text-white">{ey111.time}</div>
+                                                        <div className="text-[9px] sm:text-xs font-mono font-bold text-gray-900 dark:text-white">{ey111.time}</div>
                                                         {ey111.delay > 0 && (
-                                                            <div className="text-xs text-orange-600 font-semibold">+{ey111.delay}m</div>
+                                                            <div className="text-[9px] sm:text-xs text-orange-600 font-semibold">+{ey111.delay}m</div>
                                                         )}
                                                     </>
                                                 )}
@@ -712,100 +712,114 @@
                     </div>
 
                     {/* Latest News */}
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 mt-6">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-4 sm:p-6 mt-6">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
                             📰 Latest News & Updates
                         </h2>
-                        <div className="space-y-4">
-                            <div className="border-l-4 border-green-600 pl-4 py-2 bg-green-50 dark:bg-green-950/20">
+                        <div className="space-y-3 sm:space-y-4">
+                            <div className="border-l-4 border-green-600 pl-3 sm:pl-4 py-2 bg-green-50 dark:bg-green-950/20">
                                 <a
-                                    href="https://loyaltylobby.com/2026/04/11/etihad-operates-85-passenger-flights-ex-abu-dhabi-this-sunday-april-12-2026/"
+                                    href="https://www.timeoutdubai.com/news/uae-flights-april-2026"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                 >
-                                    Etihad Operates 85 Passenger Flights Ex-Abu Dhabi This Sunday (April 12, 2026)
+                                    UAE air travel in April 2026: The latest Emirates, flydubai and Etihad advice
                                 </a>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    <strong>LATEST - Apr 12, 2026:</strong> Operations increasing, 97 daily departures to ~80 destinations
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    <strong>LATEST - Mid-Apr 2026:</strong> Operations at 75-97 daily departures, reaching 60-70% pre-crisis capacity
                                 </p>
                             </div>
 
-                            <div className="border-l-4 border-blue-600 pl-4 py-2">
+                            <div className="border-l-4 border-blue-600 pl-3 sm:pl-4 py-2">
+                                <a
+                                    href="https://www.thenationalnews.com/travel/2026/04/09/iran-war-middle-east-flight-status/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                >
+                                    Airlines resume routes, but disruptions remain after ceasefire
+                                </a>
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Apr 9, 2026 - UAE airspace open with controlled entry/exit points, some routes using bypass paths
+                                </p>
+                            </div>
+
+                            <div className="border-l-4 border-blue-600 pl-3 sm:pl-4 py-2">
                                 <a
                                     href="https://www.visahq.com/news/2026-04-08/ae/conditional-ceasefire-with-iran-raises-hopes-for-rapid-restoration-of-uae-air-connectivity/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                 >
                                     Conditional ceasefire with Iran raises hopes for rapid restoration of UAE air connectivity
                                 </a>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                                     Apr 8, 2026 - Two-week ceasefire begins, capacity expected to climb from 40% to 70%
                                 </p>
                             </div>
 
-                            <div className="border-l-4 border-orange-600 pl-4 py-2">
+                            <div className="border-l-4 border-purple-600 pl-3 sm:pl-4 py-2">
                                 <a
-                                    href="https://blog.wego.com/etihad-airways-flight-cancellation-refunds-rebooking-and-what-to-do-next/"
+                                    href="https://loyaltylobby.com/2026/03/28/etihad-emirates-qatar-airways-four-weeks-into-the-iran-war/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                 >
-                                    Etihad Airways Flight Cancellation 2026: Refunds, Rebooking, and What to Do Next
+                                    Etihad, Emirates & Qatar Airways Four Weeks Into The Iran War
                                 </a>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    Passenger support info - Full refunds or free rebooking available for disrupted flights
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Mar 28, 2026 - Using northern (Caucasus/Afghanistan) and southern (Egypt/Saudi/Oman) bypass routes
                                 </p>
                             </div>
 
-                            <div className="border-l-4 border-red-600 pl-4 py-2">
+                            <div className="border-l-4 border-orange-600 pl-3 sm:pl-4 py-2">
                                 <a
-                                    href="https://www.agbi.com/aviation/2026/03/etihad-begins-restoring-services-after-airspace-shutdown/"
+                                    href="https://blog.wego.com/etihad-flight-status-2026/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                 >
-                                    Etihad restoring services following airspace closure due to Iran conflict
+                                    Etihad Flight Status: Routes, Schedule, and Flights Resumption
                                 </a>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    Bahrain, Kuwait routes suspended - airports damaged. Qatar airspace heavily restricted
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Passenger support - Full refunds or free rebooking available for disrupted flights through Jun 15
                                 </p>
                             </div>
 
-                            <div className="border-l-4 border-yellow-600 pl-4 py-2">
+                            <div className="border-l-4 border-yellow-600 pl-3 sm:pl-4 py-2">
                                 <a
                                     href="https://www.euronews.com/2026/03/02/iran-war-etihad-airways-resumes-some-flights-from-abu-dhabi"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                 >
                                     Iran war: UAE starts exceptional flights for stranded passengers
                                 </a>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                                     Mar 2, 2026 - First flight (EY67 to London) departed AUH at 2:39pm after airspace reopened
                                 </p>
                             </div>
 
-                            <div className="border-l-4 border-gray-600 pl-4 py-2">
+                            <div className="border-l-4 border-gray-600 pl-3 sm:pl-4 py-2">
                                 <a
                                     href="https://en.wikipedia.org/wiki/2026_Iranian_strikes_on_the_United_Arab_Emirates"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                    className="text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                 >
                                     2026 Iranian strikes on the United Arab Emirates - Full Timeline
                                 </a>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                                     438 ballistic missiles, 2,012 drones, 19 cruise missiles fired at UAE (as of Apr 1)
                                 </p>
                             </div>
                         </div>
 
-                        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-300 dark:border-yellow-700">
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
-                                <strong>⚠️ Current Status:</strong> Ceasefire active since Apr 8. Operations at ~60% capacity.
-                                Etihad passengers with tickets before Feb 28 can rebook free through Jun 15, 2026.
+                        <div className="mt-4 p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-300 dark:border-yellow-700">
+                            <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                                <strong>⚠️ Current Status (Apr 17):</strong> Ceasefire active since Apr 8. Operations at 75-97 daily departures (~60-70% capacity).
+                                UAE airspace open with controlled routing. EASA advisory extended to Apr 24. Free rebooking through Jun 15, 2026.
                             </p>
                         </div>
                     </div>
